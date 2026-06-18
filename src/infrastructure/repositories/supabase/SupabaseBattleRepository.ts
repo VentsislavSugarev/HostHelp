@@ -1,5 +1,6 @@
-import { supabase } from '../../database/supabase';import { Battle } from '../../../domain/models/Battle';
 import { BattleRepository } from '../../../domain/repositories/BattleRepository';
+import { Battle, BattleResultType } from '../../../domain/models/Battle';
+import { supabase } from '../../database/supabase';
 
 export class SupabaseBattleRepository implements BattleRepository {
   async getBattleById(id: string): Promise<Battle | null> {
@@ -9,75 +10,39 @@ export class SupabaseBattleRepository implements BattleRepository {
       .eq('id', id)
       .single();
 
-    if (error || !data) return null;
-
-    return {
-      id: data.id,
-      tournamentId: data.event_id,
-      status: 'PENDING',
-      winnerId: data.winning_team,
-      isReplica: data.result_type === 'REPLICA',
-      createdAt: new Date(data.created_at)
-    };
+    if (error) return null;
+    return data as Battle;
   }
 
-  async getBattlesByTournamentId(tournamentId: string): Promise<Battle[]> {
+  async getBattlesByEventId(eventId: string): Promise<Battle[]> {
     const { data, error } = await supabase
       .from('battles')
       .select('*')
-      .eq('event_id', tournamentId);
+      .eq('event_id', eventId)
+      .order('battle_order', { ascending: true });
 
     if (error) throw new Error(error.message);
-
-    return (data || []).map(row => ({
-      id: row.id,
-      tournamentId: row.event_id,
-      status: 'PENDING',
-      winnerId: row.winning_team,
-      isReplica: row.result_type === 'REPLICA',
-      createdAt: new Date(row.created_at)
-    }));
+    return data as Battle[];
   }
 
   async createBattle(battle: Partial<Battle>): Promise<Battle> {
     const { data, error } = await supabase
       .from('battles')
-      .insert({
-        event_id: battle.tournamentId || '00000000-0000-0000-0000-000000000000',
-        battle_order: 1,
-        stage: 'Clasificatoria',
-        format_type: 'FMS',
-        result_type: battle.isReplica ? 'REPLICA' : 'NORMAL',
-        winning_team: battle.winnerId || null
-      })
+      .insert(battle as any)
       .select()
       .single();
 
     if (error) throw new Error(error.message);
-
-    return {
-      id: data.id,
-      tournamentId: data.event_id,
-      status: 'PENDING',
-      winnerId: data.winning_team,
-      isReplica: data.result_type === 'REPLICA',
-      createdAt: new Date(data.created_at)
-    };
+    return data as Battle;
   }
 
-  async updateBattleStatus(id: string, status: Battle['status'], winnerId: string | null): Promise<void> {
+  async updateBattleResult(id: string, resultType: BattleResultType, winningTeam: string | null): Promise<void> {
     const { error } = await supabase
       .from('battles')
-      .update({ winning_team: winnerId })
-      .eq('id', id);
-
-    if (error) throw new Error(error.message);
-  }
-
-  async setReplicaFlag(id: string, isReplica: boolean): Promise<void> {
-    const { error } = await supabase
-      .from('battles')
-      .update({ result_type: isReplica ? 'REPLICA' : 'NORMAL' })
+      .update({
+        result_type: resultType,
+        winning_team: winningTeam
+      })
       .eq('id', id);
 
     if (error) throw new Error(error.message);

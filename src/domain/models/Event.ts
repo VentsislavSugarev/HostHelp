@@ -1,10 +1,11 @@
-export type EventStatus = 'DRAFT' | 'ACTIVE' | 'COMPLETED';
+export type EventStatus = 'draft' | 'published' | 'active' | 'finished';
 
 export interface Event {
   id: string;
+  organization_id: string;
   title: string;
+  date: string;
   location: string | null;
   status: EventStatus;
-  date: string;
-  createdAt: Date;
+  created_at: string;
 }

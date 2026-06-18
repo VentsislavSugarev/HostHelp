@@ -1,9 +1,11 @@
+// src/application/usecases/ResolveBattleWinnerUseCase.ts
 import { BattleRepository } from '../../domain/repositories/BattleRepository';
+import { BattleResultType } from '../../domain/models/Battle';
 
 interface ResolveBattleInput {
   battleId: string;
-  isReplica: boolean;
-  winnerMcId: string | null;
+  resultType: BattleResultType;
+  winningTeamNameOrAka: string | null;
 }
 
 export class ResolveBattleWinnerUseCase {
@@ -15,16 +17,13 @@ export class ResolveBattleWinnerUseCase {
       throw new Error('The battle you are trying to resolve does not exist.');
     }
 
-    if (input.isReplica) {
-      await this.battleRepository.setReplicaFlag(input.battleId, true);
-      await this.battleRepository.updateBattleStatus(input.battleId, 'ON_GOING', null);
+    if (input.resultType === 'replica' || input.resultType === '2_replicas') {
+      await this.battleRepository.updateBattleResult(input.battleId, input.resultType, null);
     } else {
-      if (!input.winnerMcId) {
-        throw new Error('A winnerMcId must be provided if the battle is not a replica.');
+      if (!input.winningTeamNameOrAka) {
+        throw new Error('A winner must be specified for direct decisions.');
       }
-      
-      await this.battleRepository.setReplicaFlag(input.battleId, false);
-      await this.battleRepository.updateBattleStatus(input.battleId, 'FINISHED', input.winnerMcId);
+      await this.battleRepository.updateBattleResult(input.battleId, input.resultType, input.winningTeamNameOrAka);
     }
   }
 }

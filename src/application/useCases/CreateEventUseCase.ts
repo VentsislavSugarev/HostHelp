@@ -18,8 +18,9 @@ export class CreateEventUseCase {
     const newEvent: Partial<Event> = {
       title: input.title,
       location: input.location || 'Park',
-      status: 'DRAFT',
-      date: input.date || new Date().toISOString().split('T')[0]
+      status: 'draft',
+      date: input.date || new Date().toISOString().split('T')[0],
+      organization_id: '00000000-0000-0000-0000-000000000001' // ID de tu seed data
     };
 
     return await this.eventRepository.createEvent(newEvent);
