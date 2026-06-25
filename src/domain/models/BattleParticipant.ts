@@ -4,5 +4,4 @@ export interface BattleParticipant {
   mc_id: string;
   team_number: number;
   performance_aka: string | null;
-  score: number | null;
 }
