@@ -1,9 +1,9 @@
-import { Battle, BattleResultType } from '../models/Battle';
+import { Battle } from '../models/Battle';
 
 export interface BattleRepository {
-  getBattleById(id: string): Promise<Battle | null>;
   getBattlesByEventId(eventId: string): Promise<Battle[]>;
-  createBattle(battle: Partial<Battle>): Promise<Battle>;
-  updateBattleResult(id: string, resultType: BattleResultType, winningTeam: string | null): Promise<void>;
+  getBattleById(id: string): Promise<Battle | null>;
+  saveBattle(battle: Partial<Battle>): Promise<Battle>;
+  updateBattle(id: string, battle: Partial<Battle>): Promise<Battle>;
   deleteBattle(id: string): Promise<void>;
 }

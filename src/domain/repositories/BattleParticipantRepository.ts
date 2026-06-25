@@ -2,6 +2,8 @@ import { BattleParticipant } from '../models/BattleParticipant';
 
 export interface BattleParticipantRepository {
   getParticipantsByBattleId(battleId: string): Promise<BattleParticipant[]>;
-  addParticipantsToBattle(participants: Partial<BattleParticipant>[]): Promise<BattleParticipant[]>;
-  removeParticipantFromBattle(battleId: string, mcId: string): Promise<void>;
+  getParticipantById(id: string): Promise<BattleParticipant | null>;
+  saveParticipant(participant: Partial<BattleParticipant>): Promise<BattleParticipant>;
+  updateParticipant(id: string, participant: Partial<BattleParticipant>): Promise<BattleParticipant>;
+  deleteParticipant(id: string): Promise<void>;
 }

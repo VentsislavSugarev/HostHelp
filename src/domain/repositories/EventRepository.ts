@@ -1,8 +1,9 @@
 import { Event } from '../models/Event';
 
 export interface EventRepository {
-  getAllEvents(): Promise<Event[]>;
+  getEvents(): Promise<Event[]>;
   getEventById(id: string): Promise<Event | null>;
-  createEvent(event: Partial<Event>): Promise<Event>;
-  updateEventStatus(id: string, status: Event['status']): Promise<void>;
+  saveEvent(event: Partial<Event>): Promise<Event>;
+  updateEvent(id: string, event: Partial<Event>): Promise<Event>;
+  deleteEvent(id: string): Promise<void>;
 }
