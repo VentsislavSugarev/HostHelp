@@ -1,19 +1,8 @@
 import { BattleRepository } from '../../../domain/repositories/BattleRepository';
-import { Battle, BattleResultType } from '../../../domain/models/Battle';
+import { Battle } from '../../../domain/models/Battle';
 import { supabase } from '../../database/supabase';
 
 export class SupabaseBattleRepository implements BattleRepository {
-  async getBattleById(id: string): Promise<Battle | null> {
-    const { data, error } = await supabase
-      .from('battles')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) return null;
-    return data as Battle;
-  }
-
   async getBattlesByEventId(eventId: string): Promise<Battle[]> {
     const { data, error } = await supabase
       .from('battles')
@@ -25,10 +14,21 @@ export class SupabaseBattleRepository implements BattleRepository {
     return data as Battle[];
   }
 
-  async createBattle(battle: Partial<Battle>): Promise<Battle> {
+  async getBattleById(id: string): Promise<Battle | null> {
     const { data, error } = await supabase
       .from('battles')
-      .insert(battle as any)
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) return null;
+    return data as Battle;
+  }
+
+  async saveBattle(battle: Partial<Battle>): Promise<Battle> {
+    const { data, error } = await supabase
+      .from('battles')
+      .insert(battle)
       .select()
       .single();
 
@@ -36,16 +36,16 @@ export class SupabaseBattleRepository implements BattleRepository {
     return data as Battle;
   }
 
-  async updateBattleResult(id: string, resultType: BattleResultType, winningTeam: string | null): Promise<void> {
-    const { error } = await supabase
+  async updateBattle(id: string, battle: Partial<Battle>): Promise<Battle> {
+    const { data, error } = await supabase
       .from('battles')
-      .update({
-        result_type: resultType,
-        winning_team: winningTeam
-      })
-      .eq('id', id);
+      .update(battle)
+      .eq('id', id)
+      .select()
+      .single();
 
     if (error) throw new Error(error.message);
+    return data as Battle;
   }
 
   async deleteBattle(id: string): Promise<void> {

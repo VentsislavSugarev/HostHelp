@@ -3,7 +3,7 @@ import { Mc } from '../../../domain/models/Mc';
 import { supabase } from '../../database/supabase';
 
 export class SupabaseMcRepository implements McRepository {
-  async getAllMcs(): Promise<Mc[]> {
+  async getMcs(): Promise<Mc[]> {
     const { data, error } = await supabase
       .from('mcs')
       .select('*')
@@ -27,11 +27,32 @@ export class SupabaseMcRepository implements McRepository {
   async saveMc(mc: Partial<Mc>): Promise<Mc> {
     const { data, error } = await supabase
       .from('mcs')
-      .insert(mc as any)
+      .insert(mc)
       .select()
       .single();
 
     if (error) throw new Error(error.message);
     return data as Mc;
+  }
+
+  async updateMc(id: string, mc: Partial<Mc>): Promise<Mc> {
+    const { data, error } = await supabase
+      .from('mcs')
+      .update(mc)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data as Mc;
+  }
+
+  async deleteMc(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('mcs')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw new Error(error.message);
   }
 }

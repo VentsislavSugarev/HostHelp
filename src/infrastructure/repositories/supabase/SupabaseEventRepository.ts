@@ -3,7 +3,7 @@ import { Event } from '../../../domain/models/Event';
 import { supabase } from '../../database/supabase';
 
 export class SupabaseEventRepository implements EventRepository {
-  async getAllEvents(): Promise<Event[]> {
+  async getEvents(): Promise<Event[]> {
     const { data, error } = await supabase
       .from('events')
       .select('*')
@@ -24,10 +24,10 @@ export class SupabaseEventRepository implements EventRepository {
     return data as Event;
   }
 
-  async createEvent(event: Partial<Event>): Promise<Event> {
+  async saveEvent(event: Partial<Event>): Promise<Event> {
     const { data, error } = await supabase
       .from('events')
-      .insert(event as any)
+      .insert(event)
       .select()
       .single();
 
@@ -35,10 +35,22 @@ export class SupabaseEventRepository implements EventRepository {
     return data as Event;
   }
 
-  async updateEventStatus(id: string, status: Event['status']): Promise<void> {
+  async updateEvent(id: string, event: Partial<Event>): Promise<Event> {
+    const { data, error } = await supabase
+      .from('events')
+      .update(event)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data as Event;
+  }
+
+  async deleteEvent(id: string): Promise<void> {
     const { error } = await supabase
       .from('events')
-      .update({ status })
+      .delete()
       .eq('id', id);
 
     if (error) throw new Error(error.message);

@@ -13,22 +13,45 @@ export class SupabaseBattleParticipantRepository implements BattleParticipantRep
     return data as BattleParticipant[];
   }
 
-  async addParticipantsToBattle(participants: Partial<BattleParticipant>[]): Promise<BattleParticipant[]> {
+  async getParticipantById(id: string): Promise<BattleParticipant | null> {
     const { data, error } = await supabase
       .from('battle_participants')
-      .insert(participants as any[])
-      .select();
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    if (error) throw new Error(error.message);
-    return data as BattleParticipant[];
+    if (error) return null;
+    return data as BattleParticipant;
   }
 
-  async removeParticipantFromBattle(battleId: string, mcId: string): Promise<void> {
+  async saveParticipant(participant: Partial<BattleParticipant>): Promise<BattleParticipant> {
+    const { data, error } = await supabase
+      .from('battle_participants')
+      .insert(participant)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data as BattleParticipant;
+  }
+
+  async updateParticipant(id: string, participant: Partial<BattleParticipant>): Promise<BattleParticipant> {
+    const { data, error } = await supabase
+      .from('battle_participants')
+      .update(participant)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data as BattleParticipant;
+  }
+
+  async deleteParticipant(id: string): Promise<void> {
     const { error } = await supabase
       .from('battle_participants')
       .delete()
-      .eq('battle_id', battleId)
-      .eq('mc_id', mcId);
+      .eq('id', id);
 
     if (error) throw new Error(error.message);
   }
